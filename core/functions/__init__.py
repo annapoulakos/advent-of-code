@@ -35,3 +35,7 @@ def flatten_json(nested_json):
 
     flatten(nested_json)
     return out
+
+def sparse_matrix():
+    from collections import defaultdict
+    return defaultdict(lambda: 0)

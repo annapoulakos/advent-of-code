@@ -106,58 +106,6 @@ def move(x,y,direction):
 
     return x,y
 
-@functions.start
-def aoc_2019_3_1(data, **kwargs):
-    """Find distance to closest port"""
-    data = data.strip().split('\n')
-    # data = ['R75,D30,R83,U83,L12,D49,R71,U7,L72,U62,R66,U55,R34,D71,R55,D58,R83',
-    # 'R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51,U98,R91,D20,R16,D67,R40,U7,R15,U6,R7']
-    first_path, second_path = [d.split(',') for d in data]
-
-
-
-    from collections import defaultdict
-    sparse_matrix = defaultdict(lambda: 0)
-
-    sparse_matrix[(0,0)] = -1
-
-    x = 0
-    y = 0
-    for part in first_path:
-        direction, distance = part_to_vector(part)
-        for _ in range(distance):
-            x,y = move(x,y,direction)
-            sparse_matrix[(x,y)] = 1
-
-    x, y = 0, 0
-    for part in second_path:
-        direction, distance = part_to_vector(part)
-
-        for _ in range(distance):
-            x,y = move(x,y,direction)
-            sparse_matrix[(x,y)] += 2
-
-    crossings = [k for k,v in sparse_matrix.items() if v == 3]
-    print(crossings)
-    distances = {}
-    for crossing in crossings:
-        x,y = crossing
-
-        distances[crossing] = abs(x) + abs(y)
-
-
-    print(min(distances.values()))
-
-def update_matrix(matrix, path, value):
-    x,y = 0,0
-    for part in path:
-        direction, distance = part_to_vector(part)
-        for _ in range(distance):
-            x,y = move(x,y,distance)
-            matrix[(x,y)] += value
-
-    return matrix
-
 def get_distance_to(target_x, target_y, path):
     x,y,steps = 0,0,0
     for part in path:
@@ -170,26 +118,48 @@ def get_distance_to(target_x, target_y, path):
 
     return steps
 
+
+@functions.start
+def aoc_2019_3_1(data, **kwargs):
+    """Find distance to closest port"""
+    data = data.strip().split('\n')
+    first_path, second_path = [d.split(',') for d in data]
+
+    sparse_matrix = functions.sparse_matrix()
+    sparse_matrix[(0,0)] = -1
+
+    x, y = 0, 0
+    for part in first_path:
+        direction, distance = part_to_vector(part)
+        for _ in range(distance):
+            x,y = move(x,y,direction)
+            sparse_matrix[(x,y)] = 1
+
+    x, y = 0, 0
+    for part in second_path:
+        direction, distance = part_to_vector(part)
+        for _ in range(distance):
+            x,y = move(x,y,direction)
+            sparse_matrix[(x,y)] += 2
+
+    crossings = [k for k,v in sparse_matrix.items() if v == 3]
+    distances = {}
+    for crossing in crossings:
+        x,y = crossing
+        distances[crossing] = abs(x) + abs(y)
+
+    print(min(distances.values()))
+
+
 @functions.start
 def aoc_2019_3_2(data, **kwargs):
     """Find first crossing  (by steps)"""
     data = data.strip().split('\n')
-    # data = ['R75,D30,R83,U83,L12,D49,R71,U7,L72,U62,R66,U55,R34,D71,R55,D58,R83',
-    # 'R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51,U98,R91,D20,R16,D67,R40,U7,R15,U6,R7']
-
-    # data = [
-    #     'R8,U5,L5,D3',
-    #     'U7,R6,D4,L4'
-    # ]
-
     first_path, second_path = [d.split(',') for d in data]
 
-
-
-    from collections import defaultdict
-    sparse_matrix = defaultdict(lambda: 0)
-
+    sparse_matrix = functions.sparse_matrix()
     sparse_matrix[(0,0)] = -1
+
     x,y = 0,0
     for part in first_path:
         direction, distance = part_to_vector(part)
@@ -200,7 +170,6 @@ def aoc_2019_3_2(data, **kwargs):
     x, y = 0, 0
     for part in second_path:
         direction, distance = part_to_vector(part)
-
         for _ in range(distance):
             x,y = move(x,y,direction)
             sparse_matrix[(x,y)] += 2
@@ -213,15 +182,24 @@ def aoc_2019_3_2(data, **kwargs):
         second_dist = get_distance_to(*crossing, second_path)
         intersections[crossing] = (first_dist, second_dist, first_dist+second_dist)
 
-    print(intersections)
-
     smallest = float('inf')
     for _,_,intersect in intersections.values():
         if intersect < smallest:
             smallest = intersect
 
     print(smallest)
+#endregion
 
+#region 2019 - Day 4
+
+@functions.start
+def aoc_2019_4_1(data, **kwargs):
+    """DESCRIPTION"""
+
+
+@functions.start
+def aoc_2019_4_2(data, **kwargs):
+    """"""
 
 
 #endregion
