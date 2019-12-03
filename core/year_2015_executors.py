@@ -901,3 +901,168 @@ def aoc_2015_13_2(data, **kwargs):
 
 
 #endregion
+
+#region Year 2015 - Day 15
+from collections import namedtuple
+import re
+
+Ingredient = namedtuple('Ingredient', 'name capacity durability flavor texture calories')
+
+def calculate_score(recipe):
+    capacity, durability, flavor, texture, calories = [0]*5
+
+    for ingredient, count in recipe.items():
+        capacity += count * ingredient.capacity
+        durability += count * ingredient.durability
+        flavor += count * ingredient.flavor
+        texture += count * ingredient.texture
+        calories += count * ingredient.calories
+
+    if capacity < 0 or durability < 0 or flavor < 0 or texture < 0:
+        return 0, 0
+
+    return capacity * durability * flavor * texture, calories
+
+def generate_recipe(ingredients):
+    import itertools
+    for combination in itertools.combinations_with_replacement(ingredients, 100):
+        yield combination
+
+@functions.start
+def aoc_2015_15_1(data, **kwargs):
+    """Let's make cookies. The best cookies. Better than any other cookie."""
+    data = data.strip().split('\n')
+    print(data)
+
+    '''Sugar: capacity 0, durability 0, flavor -2, texture 2, calories 1'''
+    PATTERN = r'(\w+): capacity (-?\d+), durability (-?\d+), flavor (-?\d+), texture (-?\d+), calories (-?\d+)'
+    ingredients = []
+    for line in data:
+        matches = re.findall(PATTERN, line)
+        if matches:
+            stats = [matches[0][0], int(matches[0][1]), int(matches[0][2]), int(matches[0][3]), int(matches[0][4]), int(matches[0][5])]
+            ingredients.append(Ingredient(*stats))
+
+    import itertools
+    from collections import defaultdict
+    best_score, best_recipe = 0, None
+    for ingredient_list in itertools.combinations_with_replacement(ingredients, 100):
+        recipe = defaultdict(lambda: 0)
+        for ingredient in ingredient_list:
+            recipe[ingredient] += 1
+
+        score, _ = calculate_score(recipe)
+        if score > best_score:
+            best_score = score
+            best_recipe = recipe.copy()
+
+    print(best_score)
+    print(best_recipe)
+
+@functions.start
+def aoc_2015_15_2(data, **kwargs):
+    """Let's make cookies, but this time with only 500 calories"""
+    data = data.strip().split('\n')
+    print(data)
+
+    '''Sugar: capacity 0, durability 0, flavor -2, texture 2, calories 1'''
+    PATTERN = r'(\w+): capacity (-?\d+), durability (-?\d+), flavor (-?\d+), texture (-?\d+), calories (-?\d+)'
+    ingredients = []
+    for line in data:
+        matches = re.findall(PATTERN, line)
+        if matches:
+            stats = [matches[0][0], int(matches[0][1]), int(matches[0][2]), int(matches[0][3]), int(matches[0][4]), int(matches[0][5])]
+            ingredients.append(Ingredient(*stats))
+
+    import itertools
+    from collections import defaultdict
+    best_score, best_recipe = 0, None
+    for ingredient_list in itertools.combinations_with_replacement(ingredients, 100):
+        recipe = defaultdict(lambda: 0)
+        for ingredient in ingredient_list:
+            recipe[ingredient] += 1
+
+        score, calories = calculate_score(recipe)
+        if calories == 500 and score > best_score:
+            best_score = score
+            best_recipe = recipe.copy()
+
+    print(best_score)
+    print(best_recipe)
+#endregion
+
+#region Year 2015 - Day 16
+MFSCAM_DATA = {
+    'children': 3,
+    'cats': 7,
+    'samoyeds': 2,
+    'pomeranians': 3,
+    'akitas': 0,
+    'vizslas': 0,
+    'goldfish': 5,
+    'trees': 3,
+    'cars': 2,
+    'perfumes': 1,
+}
+
+def build_aunt_list(data):
+    aunts = []
+    for line in data:
+        aunt, _, info = line.partition(':')
+        _, _, aunt_identifier = aunt.partition(' ')
+        aunt_data_points = info.split(',')
+        aunt_data = {}
+        for ad in aunt_data_points:
+            item, quantity = ad.split(':')
+            item = item.strip()
+            quantity = int(quantity.strip())
+            aunt_data[item] = quantity
+        aunts.append((aunt_identifier, aunt_data))
+    return aunts
+
+@functions.start
+def aoc_2015_16_1(data, **kwargs):
+    data = data.strip().split('\n')
+    aunts = build_aunt_list(data)
+
+    for key, value in MFSCAM_DATA.items():
+        aunts_to_remove = []
+        for aunt in aunts:
+            _, aunt_data = aunt
+            if key in aunt_data and aunt_data[key] != value:
+                aunts_to_remove.append(aunt)
+
+        for a in aunts_to_remove:
+            aunts.remove(a)
+
+    print(aunts)
+
+@functions.start
+def aoc_2015_16_2(data, **kwargs):
+    data = data.strip().split('\n')
+    aunts = build_aunt_list(data)
+
+    for key, value in MFSCAM_DATA.items():
+        aunts_to_remove = []
+        for aunt in aunts:
+            _, aunt_data = aunt
+            if key in aunt_data:
+                if key in ['cats', 'trees']:
+                    if aunt_data[key] <= value:
+                        print(f'removing {aunt} for cats|trees issue (must be gt {value})')
+                        aunts_to_remove.append(aunt)
+                elif key in ['pomeranians', 'goldfish']:
+                    if aunt_data[key] >= value:
+                        print(f'removing {aunt} for pomeranians|goldfish issue (must be less than {value})')
+                        aunts_to_remove.append(aunt)
+                else:
+                    if aunt_data[key] != value:
+                        print(f'removing {aunt} for value failure {key}, {value}')
+                        aunts_to_remove.append(aunt)
+
+        for a in aunts_to_remove:
+            aunts.remove(a)
+
+    print(aunts)
+
+#endregion
