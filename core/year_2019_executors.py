@@ -191,15 +191,58 @@ def aoc_2019_3_2(data, **kwargs):
 #endregion
 
 #region 2019 - Day 4
+import re
+
+def ascending(nums):
+    return nums[5] >= nums[4] >= nums[3] >= nums[2] >= nums[1] >= nums[0]
 
 @functions.start
 def aoc_2019_4_1(data, **kwargs):
-    """DESCRIPTION"""
+    """Password crackin' part 1"""
+    lower, upper = data.strip().split('-')
+    lower = int(lower)
+    upper = int(upper)
 
+    match_criteria = []
+    PATTERN = r'(\d)\1+'
+    for x in range(lower, upper+1):
+        matches = re.search(PATTERN, str(x))
+        if matches:
+            nums = str(x)
+            if ascending(nums):
+                match_criteria.append(x)
+
+    print(match_criteria)
+    print(f'found {len(match_criteria)} matches')
 
 @functions.start
 def aoc_2019_4_2(data, **kwargs):
-    """"""
+    """better password crackin'"""
+
+    lower, upper = data.strip().split('-')
+    lower = int(lower)
+    upper = int(upper)
+
+    match_criteria = []
+
+    matches = [x for x in range(lower, upper) if ascending(str(x))]
+    print(f'Matches only ascending numbers: {len(matches)}')
+
+    def has_pair(val):
+        s = str(val)
+        matches = re.findall(r'(\d)\1+', s)
+
+        if not matches:
+            return False
+
+        counts = []
+        for m in matches:
+            counts.append(len([l for l in s if l == m]))
+
+        return any([True for c in counts if c == 2])
+
+    matches = [x for x in matches if has_pair(x)]
+    print(f'Found values with at least 1 matching pair (but no larger groups: {len(matches)}')
 
 
 #endregion
