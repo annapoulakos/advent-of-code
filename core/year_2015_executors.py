@@ -378,273 +378,74 @@ def aoc_2015_8_2(year, day, **kwargs):
 
 
 #region Day 9
-@dataclass
-class Node:
-    name: str
-    index: int = field(default=None)
+import itertools
 
-class BinaryTree:
-    def __init__(self, nodes = []):
-        self.nodes = nodes
+def generate_route_distances(routes, distance_data):
+    distances = []
+    for route in routes:
+        route_distance = 0
+        valid = False
+        for index, city in enumerate(route[1:]):
+            key = (route[index], route[index+1])
+            valid = key in distance_data
+            if valid:
+                route_distance += distance_data[key]
+            else:
+                break
 
-    def root(self):
-        return self.nodes[0]
+        if valid:
+            distances.append((route, route_distance))
+    return distances
 
-    def iparent(self, i):
-        return (i - 1) // 2
-
-    def ileft(self, i):
-        return 2*i + 1
-
-    def iright(self, i):
-        return 2*i + 2
-
-    def left(self, i):
-        return self.node_at_index(self.ileft(i))
-
-    def right(self, i):
-        return self.node_at_index(self.iright(i))
-
-    def parent(self, i):
-        return self.node_at_index(self.iparent(i))
-
-    def node_at_index(self, i):
-        return self.nodes[i]
-
-    def size(self):
-        return len(self.nodes)
-
-class MinHeap(BinaryTree):
-    def __init__(self, nodes, is_less_than=lambda a,b:a<b, get_index=None, update_node=lambda n,v: v):
-        super().__init__(nodes)
-        self.order_mapping = list(range(len(nodes)))
-        self.is_less_than, self.get_index, self.update_node = is_less_than, get_index, update_node
-        self.heapify()
-
-    def heapify(self):
-        for i in range(len(self.nodes), -1, -1):
-            self.heapify_subtree(i)
-
-    def heapify_subtree(self, index):
-        size = self.size()
-        ileft = self.ileft(index)
-        iright = self.iright(index)
-        imin = index
-        if ileft < size and self.is_less_than(self.nodes[ileft], self.nodes[imin]):
-            imin = ileft
-        if iright < size and self.is_less_than(self.nodes[iright], self.nodes[imin]):
-            imin = iright
-        if imin != index:
-            self.nodes[index], self.nodes[imin] = self.nodes[imin], self.nodes[index]
-            if self.get_index is not None:
-                self.order_mapping[self.get_index(self.nodes[imin])] = imin
-                self.order_mapping[self.get_index(self.nodes[index])] = index
-            self.heapify_subtree(imin)
-
-    def min(self):
-        return self.root()
-
-    def pop(self):
-        min_node = self.nodes[0]
-        if self.size() > 1:
-            self.nodes[0] = self.nodes[-1]
-            self.nodes.pop()
-            if self.get_index is not None:
-                self.order_mapping[self.get_index(self.nodes[0])] = 0
-            self.heapify_subtree(0)
-        elif self.size() == 1:
-            self.nodes.pop()
-        else:
-            return None
-
-        if self.get_index is not None:
-            self.order_mapping[self.get_index(min_node)] = None
-        return min_node
-
-    def decrease_key(self, index, value):
-        self.nodes[index] = self.update_node(self.nodes[index], value)
-        iparent = self.iparent(index)
-
-        while index != 0 and self.is_less_than(self.nodes[iparent], self.nodes[index]):
-            self.nodes[iparent], self.nodes[index] = self.nodes[index], self.nodes[iparent]
-
-            if self.get_index is not None:
-                self.order_mapping[self.get_index(self.nodes[iparent])] = iparent
-                self.order_mapping[self.get_index(self.nodes[index])] = index
-
-            index = iparent
-            iparent = self.iparent(index) if index > 0 else None
-
-class DijkstraNodeDecorator:
-    def __init__(self, node):
-        self.node = node
-        self.prov_dist = float('inf')
-        self.hops = []
-
-    @property
-    def index(self):
-        return self.node.index
-
-    @property
-    def name(self):
-        return self.node.name
-
-    def update_data(self, data):
-        self.prov_dist = data['prov_dist']
-        self.hops = data['hops']
-        return self
-
-class Graph:
-    def __init__(self, nodes):
-        self.adjacency_list = [[node, []] for node in nodes]
-        for i in range(len(nodes)):
-            nodes[i].index = i
-
-    def connect_dir(self, n1, n2, w=1):
-        n1, n2 = self.get_index_from_node(n1), self.get_index_from_node(n2)
-        self.adjacency_list[n1][1].append((n2, w))
-
-    def connect(self, n1, n2, w=1):
-        self.connect_dir(n1, n2, w)
-        self.connect_dir(n2, n1, w)
-
-    def connections(self, node):
-        node = self.get_index_from_node(node)
-        return self.adjacency_list[node][1]
-
-    def get_index_from_node(self, node):
-        if not isinstance(node, Node) and not isinstance(node, int):
-            raise ValueError('node must be an int or Node object')
-
-        if isinstance(node, int):
-            return node
-        else:
-            return node.index
-
-    def dijkstra(self, source):
-        source_index = self.get_index_from_node(source)
-        # print(self.adjacency_list)
-
-        dnodes = [DijkstraNodeDecorator(node_edges[0]) for node_edges in self.adjacency_list]
-        dnodes[source_index].prov_dist = 0
-        dnodes[source_index].hops.append(dnodes[source_index].node)
-
-        is_less_than = lambda a,b: a.prov_dist < b.prov_dist
-        get_index = lambda node: node.index
-        update_node = lambda node, data: node.update_data(data)
-
-        heap = MinHeap(dnodes, is_less_than, get_index, update_node)
-
-        min_dist_list = []
-
-        while heap.size() > 0:
-            min_decorated_node = heap.pop()
-            min_dist = min_decorated_node.prov_dist
-            hops = min_decorated_node.hops
-
-            min_dist_list.append([min_dist, hops])
-            connections = self.connections(min_decorated_node.node)
-            for inode, weight in connections:
-                node = self.adjacency_list[inode][0]
-                heap_location = heap.order_mapping[inode]
-
-                if heap_location is not None:
-                    total_distance = weight + min_dist
-                    # print(f'Distance: {total_distance}')
-                    # print(f'Target: {heap.nodes[heap_location].prov_dist}')
-                    if total_distance < heap.nodes[heap_location].prov_dist:
-                        hops_copy = list(hops)
-                        hops_copy.append(node)
-                        # print(hops_copy)
-                        data = {'prov_dist': total_distance, 'hops': hops}
-                        heap.decrease_key(heap_location, data)
-
-        return min_dist_list
-
-def aoc_2015_9_1(year, day, **kwargs):
-    greet(year, day, **kwargs)
-
-    data = load_data('2015.9.test.txt').strip('\n').split('\n')
-
-    graph_data = []
-    for datum in data:
-        route, _, distance = datum.rpartition('=')
-        distance = int(distance.strip())
-        left, right = route.split('to')
-        left = left.strip()
-        right = right.strip()
-        graph_data.append((left, right, distance))
-
-    node_map = {}
+def generate_city_data(raw_data):
+    distance_data = {}
     cities = set()
-    adjacency_list = {}
-    first = None
-    distance_map = {}
-    for left, right, distance in graph_data:
-        if first is None:
-            first = left
-        if left not in node_map:
-            node_map[left] = Node(left)
-        if right not in node_map:
-            node_map[right] = Node(right)
+    for datum in raw_data:
+        route, _, distance = datum.rpartition('=')
+        start, _, end = route.partition('to')
+        start = start.strip()
+        end = end.strip()
+        distance = int(distance.strip())
 
-        cities.add(left)
-        cities.add(right)
+        distance_data[(start,end)] = distance
+        distance_data[(end,start)] = distance
+        cities.add(start)
+        cities.add(end)
+    return distance_data, cities
 
-        if left not in adjacency_list:
-            adjacency_list[left] = []
-        if right not in adjacency_list:
-            adjacency_list[right] = []
+@functions.start
+def aoc_2015_9_1(data, **kwargs):
+    raw_data = data.strip().split('\n')
 
-        adjacency_list[left].append(right)
-        adjacency_list[right].append(left)
+    data, cities = generate_city_data(raw_data)
+    routes = [list(route) for route in itertools.permutations(cities)]
+    distances = generate_route_distances(routes, data)
 
-        distance_map[(left,right)] = distance
-        distance_map[(right,left)] = distance
+    min_distance = float('inf')
+    min_route = None
+    for route, distance in distances:
+        if distance < min_distance:
+            min_distance = distance
+            min_route = route
 
-    print(node_map)
-    print(adjacency_list)
-    print(distance_map)
-    print(cities)
-    print('-----------------------')
+    print(min_distance, min_route)
 
-    routes = []
-    for city in cities:
-        unvisited = cities.copy()
-        unvisited.remove(city)
-        route = set(city)
+@functions.start
+def aoc_2015_9_2(data, **kwargs):
+    raw_data = data.strip().split('\n')
 
-        while unvisited:
-            break
+    data, cities = generate_city_data(raw_data)
+    routes = [list(route) for route in itertools.permutations(cities)]
+    distances = generate_route_distances(routes, data)
 
-        # min_dist = None, float('inf')
-        # while unvisited:
-        #     for uncity in unvisited:
-        #         distance = distance_map[(city, uncity)]
-        #         if distance < min_dist:
-        #             min_dist = uncity, distance
+    max_distance = -1
+    max_route = None
+    for route, distance in distances:
+        if distance > max_distance:
+            max_distance = distance
+            max_route = route
 
-        #     route.add(uncity)
-        #     unvisited.remove(uncity)
-
-        # routes.append(route)
-
-    print(routes)
-
-
-    # nodes = [node for _, node in node_map.items()]
-    # print(nodes)
-    # graph = Graph(nodes)
-
-    # for left, right, distance in graph_data:
-    #     print(f'connecting: {left} -> {right} -- {distance}')
-    #     graph.connect(node_map[left], node_map[right], distance)
-
-    # print('----------------')
-    # for node, weight in graph.dijkstra(node_map[first]):
-    #     print(node)
-    #     print(weight)
-
+    print(max_distance, max_route)
 #endregion
 
 #region 2015 - Day 10
