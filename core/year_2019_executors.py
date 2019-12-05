@@ -265,6 +265,9 @@ class IntCode:
     def value_from_mode(self, index, mode):
         return self.program[index] if mode == '0' else index
 
+    def __getitem__(self, index):
+        return self.program[index]
+
     def execute_command(self, index):
         print(f'Executing command at index {index}')
         command, modes = self.parse_opcode(self.program[index])
