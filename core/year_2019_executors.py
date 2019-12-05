@@ -246,3 +246,146 @@ def aoc_2019_4_2(data, **kwargs):
 
 
 #endregion
+
+#region 2019 - Day 5
+
+class IntCode:
+    def __init__(self, program, input_value):
+        self.program = program
+        self.input_value = input_value
+
+    def parse_opcode(self, opcode):
+        opcode = f'{opcode:0>5}'
+        print(f'opcode: {opcode}')
+        command = opcode[-2:]
+        mode_3, mode_2, mode_1 = opcode[:3]
+
+        return command, [mode_1, mode_2, mode_3]
+
+    def value_from_mode(self, index, mode):
+        return self.program[index] if mode == '0' else index
+
+    def execute_command(self, index):
+        print(f'Executing command at index {index}')
+        command, modes = self.parse_opcode(self.program[index])
+
+        if command == '01':
+            """Adder"""
+            print(f'Adder Params: {self.program[index:index+4]}')
+            l, r, target = self.program[index+1:index+4]
+
+            left = self.value_from_mode(l, modes[0])
+            right = self.value_from_mode(r, modes[1])
+
+            print(f'Storing {left} + {right} = {left+right} at index {target}')
+
+            self.program[target] = left + right
+            return index + 4
+        elif command == '02':
+            """Multi"""
+            print(f'Multi Params: {self.program[index:index+4]}')
+            l, r, target = self.program[index+1:index+4]
+
+            left = self.value_from_mode(l, modes[0])
+            right = self.value_from_mode(r, modes[1])
+
+            print(f'Storing {left} * {right} = {left * right} at index {target}')
+
+            self.program[target] = left * right
+            return index + 4
+        elif command == '03':
+            """Input"""
+            print(f'Input Params: {self.program[index:index+2]}')
+            target = self.program[index + 1]
+            print(f'Setting input value {self.input_value} at index {target}')
+            self.program[target] = self.input_value
+            return index + 2
+        elif command == "04":
+            """Output"""
+            print(f'Output Params: {self.program[index:index+2]}')
+            target = self.program[index+1]
+            output = self.value_from_mode(target, modes[0])
+            print(f'OUTPUT: {output}')
+            return index + 2
+        elif command == "05":
+            """Jump if true"""
+            print(f'Input Params: {self.program[index:index+3]}')
+            f, s = self.program[index+1:index+3]
+            first = self.value_from_mode(f, modes[0])
+            second = self.value_from_mode(s, modes[1])
+
+            print(f'Jump if True: {first} == 0 ? {second}')
+
+            return second if first != 0 else index + 3
+        elif command == "06":
+            """Jump if false"""
+            print(f'Input Params: {self.program[index:index+3]}')
+            f, s = self.program[index+1:index+3]
+            first = self.value_from_mode(f, modes[0])
+            second = self.value_from_mode(s, modes[1])
+
+            print(f'Jump if False: {first} != 0 ? {second}')
+            return second if first == 0 else index + 3
+        elif command == "07":
+            """Less Than"""
+            print(f'Input Params: {self.program[index:index+4]}')
+            f, s, target = self.program[index+1:index+4]
+
+            first = self.value_from_mode(f, modes[0])
+            second = self.value_from_mode(s, modes[1])
+
+            value = 1 if first < second else 0
+            print(f'Less Than: {first} < {second}? 1: 0')
+            print(f'Storing {value} at index {target}')
+            self.program[target] = value
+
+            return index + 4
+        elif command == "08":
+            """equals"""
+            print(f'Input Params: {self.program[index:index+4]}')
+            f, s, target = self.program[index+1:index+4]
+
+            first = self.value_from_mode(f, modes[0])
+            second = self.value_from_mode(s, modes[1])
+
+            value = 1 if first == second else 0
+            print(f'Equal: {first} == {second}? 1: 0')
+            print(f'Storing {value} at index {target}')
+            self.program[target] = value
+
+            return index + 4
+        elif command == "99":
+            """END"""
+            return -1
+
+        raise Exception(f'Unable to action command {command}')
+
+
+@functions.start
+def aoc_2019_5_1(data, **kwargs):
+    """add TEST to INTCODE Computer"""
+    data = [int(x) for x in data.strip().split(',')]
+    program = IntCode(data, 1)
+    program_index = 0
+
+    print(f'Total Program Elements: {len(data)}')
+
+    while program_index != -1:
+        program_index = program.execute_command(program_index)
+        print('------------------------------------------------------')
+
+@functions.start
+def aoc_2019_5_2(data, **kwargs):
+    """add TEST to INTCODE Computer"""
+    data = [int(x) for x in data.strip().split(',')]
+    program = IntCode(data, 5)
+    program_index = 0
+
+    print(f'Total Program Elements: {len(data)}')
+
+    while program_index != -1:
+        program_index = program.execute_command(program_index)
+        print('------------------------------------------------------')
+
+
+#endregion
