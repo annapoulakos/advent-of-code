@@ -647,7 +647,6 @@ def aoc_2015_12_2(data, **kwargs):
     print(sum(nums))
 #endregion
 
-
 #region 2015 - Day 13
 
 @functions.start
@@ -867,3 +866,132 @@ def aoc_2015_16_2(data, **kwargs):
     print(aunts)
 
 #endregion
+
+#region Year 2015 - Day 17
+def parse_data_17(data):
+    return [int(x) for x in data.strip().split('\n')]
+
+def create_combinations(data):
+    import itertools
+    all_combinations = []
+    for s in range(1, len(data)+1):
+        combinations = list(itertools.combinations(data, s))
+        all_combinations += combinations
+
+    return all_combinations
+
+def get_combinations_matching(data, target):
+    all_combinations = create_combinations(data)
+
+    matching = [combination for combination in all_combinations if sum(combination) == target]
+    return matching
+
+@functions.start
+def aoc_2015_17_1(data, **kwargs):
+    """"""
+    data = parse_data_17(data)
+    TARGET_SIZE = 150
+    matching_combinations = get_combinations_matching(data, TARGET_SIZE)
+
+    print(f'found {len(matching_combinations)} matches')
+
+@functions.start
+def aoc_2015_17_2(data, **kwargs):
+    """"""
+    data = parse_data_17(data)
+    TARGET_SIZE = 150
+
+    matches = get_combinations_matching(data, TARGET_SIZE)
+    print(f'Found {len(matches)} matches.')
+    sizes = set([len(m) for m in matches])
+    print(f'Found {len(sizes)} distinct sizes: {sizes}')
+
+    smallest = min(sizes)
+    print(f'Looking for combinations with size {smallest}')
+    small_matches = [m for m in matches if len(m) == smallest]
+    print(f'Found {len(small_matches)} matches')
+
+
+#endregion
+
+
+#region Year 2015 - Day 18
+class Matrix:
+    def __init__(self):
+        from collections import defaultdict
+        import itertools
+        self.__internal = defaultdict(lambda: False)
+
+        self.__size = (0,0)
+
+    def __getitem__(self, key):
+        return self.__internal[key]
+
+    def get_surrounding(self, key):
+        x,y = key
+        surrounding = []
+        for ix, iy in self.iterator(key=key):
+            mx, my = ix-1, iy-1
+            if mx == x and my == y:
+                continue
+
+            surrounding.append(self[(mx,my)])
+
+        assert len(surrounding) == 8
+        return surrounding
+
+    def print(self):
+        x,y = self.size
+        for ix, iy in self.iterator():
+            print('#' if self[(ix,iy)] else '.')
+
+    def iterator(self, key=None):
+        x, y = key if key is not None else self.size
+        return itertools.product(range(x), range(y))
+
+    @property
+    def size(self):
+        return self.__size
+
+    @size.setter
+    def size(self, value):
+        self.__size = value
+
+
+    @property
+    def x(self):
+        x, _ = self.size
+        return x
+
+    @property
+    def y(self):
+        _, y = self.size
+        return y
+
+def generate_matrix(data):
+    lines = data.strip().split('\n')
+    matrix = Matrix()
+
+    for x, line in enumerate(lines):
+        for y, char in enumerate(line):
+            matrix[(x,y)] = char == '#'
+
+    size = len(lines), len(lines[0])
+    matrix.size = size
+
+    return matrix
+
+
+
+@functions.start
+def aoc_2015_18_1(data, **kwargs):
+    """Animating the lights..."""
+    data = '.#.#.#\n...##.\n#....#\n..#...\n#.#..#\n####..'
+    matrix = generate_matrix(data)
+    print(matrix)
+
+    import itertools
+
+    for x,y in itertools.product(range(matrix.x), range(matrix.y)):
+        s = matrix.get_surrounding((x,y))
+        print(s)

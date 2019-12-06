@@ -193,8 +193,9 @@ def aoc_2019_3_2(data, **kwargs):
 #region 2019 - Day 4
 import re
 
-def ascending(nums):
-    return nums[5] >= nums[4] >= nums[3] >= nums[2] >= nums[1] >= nums[0]
+def ascending(ns):
+    #return ns[5] >= ns[4] >= ns[3] >= ns[2] >= ns[1] >= ns[0]
+    return all([ns[i+1]>=ns[i] for i,_ in enumerate(ns[1:])])
 
 @functions.start
 def aoc_2019_4_1(data, **kwargs):
