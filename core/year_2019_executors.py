@@ -393,3 +393,60 @@ def aoc_2019_5_2(data, **kwargs):
 
 
 #endregion
+
+#region 2019 - Day 6
+from collections import namedtuple, defaultdict
+CelestialObject = namedtuple('CelestialObject', 'name parent')
+
+def create_orbit_map(data):
+    lines = data.strip().split('\n')
+
+    celestial_objects = set()
+    orbit_graph = {}
+    for line in lines:
+        orbitee, _, orbiter = line.partition(')')
+        celestial_objects.add(orbitee)
+        celestial_objects.add(orbiter)
+
+        orbit_graph[orbiter] = orbitee
+
+    return celestial_objects, orbit_graph
+
+def get_orbits(celestial_object, orbit_graph):
+    parent = orbit_graph.get(celestial_object, None)
+
+    return 0 if parent is None else 1 + get_orbits(parent, orbit_graph)
+
+def make_path(target, orbit_graph):
+    parent = orbit_graph.get(target, None)
+    path = []
+
+    while parent is not None:
+        path.append(parent)
+        parent = orbit_graph.get(parent, None)
+
+    return path
+
+@functions.start
+def aoc_2019_6_1(data, **kwargs):
+    """Verify integrity of orbit mapping"""
+    #data = 'COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L'
+    objects, graph = create_orbit_map(data)
+
+    print(sum([get_orbits(p, graph) for p in objects]))
+
+@functions.start
+def aoc_2019_6_2(data, **kwargs):
+    """Calculate orbital transfers to santa"""
+    _, graph = create_orbit_map(data)
+
+    path_you = make_path('YOU', graph)
+    path_san = make_path('SAN', graph)
+
+    diff_l = set(path_you) - set(path_san)
+    diff_r = set(path_san) - set(path_you)
+
+    print(f'Hops: {len(diff_l | diff_r)}')
+
+
+#endregion
