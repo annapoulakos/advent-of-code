@@ -15,5 +15,11 @@ cli.add_command(d3)
 from app.d4 import d4
 cli.add_command(d4)
 
+from app.d5 import d5
+cli.add_command(d5)
+
+from app.d6 import d6
+cli.add_command(d6)
+
 if __name__ == '__main__':
     cli()
