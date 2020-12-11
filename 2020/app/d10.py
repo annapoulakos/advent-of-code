@@ -44,6 +44,11 @@ def p2():
 
         return sum([get_children(value+x) for x in range(1,4)])
 
+    import time
+    start = time.perf_counter()
     paths = get_children(0)
+    end = time.perf_counter()
+
+    print(f'time: {end - start:0.4f}')
 
     print(f'output: {paths}')
