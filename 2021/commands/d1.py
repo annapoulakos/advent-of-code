@@ -2,14 +2,8 @@ import click
 from modules import fileutils, utils
 
 def counter(lst):
-    cnt = 0
-    c = lst[0]
+    return sum([(1 if v>lst[i] else 0) for i,v in enumerate(lst[1:])])
 
-    for v in lst[1:]:
-        if v > c: cnt += 1
-        c = v
-
-    return cnt
 
 def part_1(data):
     """Part 1"""
