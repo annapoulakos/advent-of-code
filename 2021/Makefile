@@ -11,3 +11,4 @@ commands/d%.py:
 	cp templates/default.py.tpl $(@)
 	sed -i '' 's/{VALUE}/$(*)/' $(@)
 	touch data/day-$(*).txt
+	touch data/day-ex-$(*).txt

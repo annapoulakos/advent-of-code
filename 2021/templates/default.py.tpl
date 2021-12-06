@@ -11,10 +11,11 @@ def part_2(data):
 
 
 @click.command()
+@click.option('--test', '-t', is_flag=True, default=False)
 @click.argument('part', type=int)
-def d{VALUE}(part):
+def d{VALUE}(test, part):
     """Day {VALUE} commands"""
-    data = fileutils.load_raw({VALUE})
+    data = fileutils.load_raw({VALUE}, test)
 
     fn = {
         1: part_1,
