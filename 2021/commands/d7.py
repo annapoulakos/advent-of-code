@@ -5,40 +5,22 @@ from collections import Counter
 def calculate_cost_for_target(crabs, target):
     return sum([abs(x-target) for x in crabs])
 
-def calculate_cost(crabs):
-    count = len(crabs) // 10
-    c = Counter(crabs)
-    mc = c.most_common(count)
-
-    best = None
-    for t,_ in mc:
-        new = calculate_cost_for_target(crabs, t)
-        if best is None or new < best: best = new
-
-    return best
-
 def calculate_extra_cost_for_target(crabs, target):
     fn = lambda n: (n * (n+1)) // 2
     return sum([fn(abs(x-target)) for x in crabs])
 
-
-def calculate_extra_cost(crabs):
-    start = min(crabs)
-    end = max(crabs)
-
-    best = None
-    for target in range(start, end):
-        new = calculate_extra_cost_for_target(crabs, target)
-        if best is None or new < best: best = new
-
-    return best
-
+def get_best_cost(crabs, lst, fn):
+    return min(fn(crabs, t) for t in lst)
 
 def part_1(data):
     """Part 1"""
     start = time.perf_counter()
 
-    best = calculate_cost(data)
+    count = len(data) // 10
+    c = Counter(data)
+    lst = [t for t,_ in c.most_common(count)]
+
+    best = get_best_cost(data, lst, calculate_cost_for_target)
 
     end = time.perf_counter()
 
@@ -50,7 +32,7 @@ def part_2(data):
     """Part 2"""
     start = time.perf_counter()
 
-    best = calculate_extra_cost(data)
+    best = get_best_cost(data, range(min(data),max(data)), calculate_extra_cost_for_target)
 
     end = time.perf_counter()
 
