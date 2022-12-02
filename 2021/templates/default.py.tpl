@@ -33,6 +33,7 @@ def part_2(data):
 @click.argument('part', type=int)
 def d{VALUE}(test, part):
     """Day {VALUE} commands"""
+    print(f'AoC :: Day {VALUE} :: Part {part} {":: (test)" if test else ""}')
     data = fileutils.load_raw({VALUE}, test)
 
     fn = {
