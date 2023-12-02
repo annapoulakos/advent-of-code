@@ -59,7 +59,7 @@ class HeightMap:
         basins = defaultdict(int)
         for lp in lowest:
             to_check = set(self.get_neighbors(lp))
-            in_basin = []
+            in_basin = set()
             checked = set()
 
             while len(to_check) > 0:
@@ -68,7 +68,7 @@ class HeightMap:
                     break
 
                 if self.get(check) < 9:
-                    in_basin.append(check)
+                    in_basin.add(check)
                     to_check.update(self.get_neighbors(check))
 
                 to_check.remove(check)

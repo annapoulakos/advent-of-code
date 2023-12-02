@@ -1,4 +1,4 @@
-import click, time
+import click, time, statistics
 from modules import fileutils
 from collections import Counter
 
@@ -6,11 +6,11 @@ def calculate_cost_for_target(crabs, target):
     return sum([abs(x-target) for x in crabs])
 
 def calculate_extra_cost_for_target(crabs, target):
-    fn = lambda n: (n * (n+1)) // 2
-    return sum([fn(abs(x-target)) for x in crabs])
+    fx = lambda n: (n * (n+1)) // 2
+    return sum([fx(abs(x-target)) for x in crabs])
 
-def get_best_cost(crabs, lst, fn):
-    return min(fn(crabs, t) for t in lst)
+def get_best_cost(crabs, lst, fx):
+    return min(fx(crabs, t) for t in lst)
 
 def part_1(data):
     """Part 1"""
@@ -27,7 +27,6 @@ def part_1(data):
     print(f'{best=}')
     print(f'elapsed = {end-start:.4f}')
 
-
 def part_2(data):
     """Part 2"""
     start = time.perf_counter()
@@ -39,6 +38,16 @@ def part_2(data):
     print(f'{best=}')
     print(f'elapsed = {end-start:.4f}')
 
+def part_3(data):
+    """Part 3"""
+    mean = int(statistics.mean(data))
+    r = [mean-1, mean, mean+1]
+
+    best1 = get_best_cost(data, r, calculate_extra_cost_for_target)
+    best2 = get_best_cost(data, range(min(data), max(data)), calculate_extra_cost_for_target)
+
+    print(f'{best1=}')
+    print(f'{best2=}')
 
 @click.command()
 @click.option('--test', '-t', is_flag=True, default=False)
@@ -51,6 +60,7 @@ def d7(test, part):
     fn = {
         1: part_1,
         2: part_2,
+        3: part_3,
     }.get(part)
 
     fn(data)

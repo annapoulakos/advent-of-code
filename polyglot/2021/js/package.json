@@ -1,0 +1,12 @@
+{
+  "name": "aoc-2021",
+  "version": "1.0.0",
+  "description": "Advent of code; 2021",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "aoc": "node index.js"
+  },
+  "author": "Anna Poulakos",
+  "license": "MIT"
+}

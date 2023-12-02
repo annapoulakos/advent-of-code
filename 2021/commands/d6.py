@@ -1,12 +1,16 @@
 import click
 from modules import fileutils
 from collections import defaultdict
+import time
 
 def age(data, days):
+    start = time.perf_counter()
     current = defaultdict(lambda: 0)
 
     for n in data:
         current[n] += 1
+
+    print(f'start: {current}')
 
     for x in range(days):
         next_gen = defaultdict(lambda: 0)
@@ -19,12 +23,18 @@ def age(data, days):
                 next_gen[ng] += current[f]
         current = next_gen
 
+        print(f'elapsed days: {x+1}')
+        print(f'counts: {dict(current)} = {sum(current.values())}')
+
+    end = time.perf_counter()
+    print(f'elapsed: {end-start:.4f}')
     return current
 
 
 def part_1(data):
     """Part 1"""
     current = age(data, 80)
+    print(current)
     print(sum(current.values()))
 
 

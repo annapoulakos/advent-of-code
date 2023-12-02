@@ -6,6 +6,12 @@ SHELL := /bin/zsh
 MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
+run-%:
+	@aoc d$(*) -t 1
+	@aoc d$(*) 1
+	@aoc d$(*) -t 2
+	@aoc d$(*) 2
+
 
 commands/d%.py:
 	cp templates/default.py.tpl $(@)

@@ -19,12 +19,17 @@ def get_value(lst, parity):
     parts = [x for x in lst]
 
     for x in range(len(lst[0])):
+        print(parts)
         bits = sum(int(d[x]) for d in parts)
+        print(f'bits: {bits}')
 
         if bits == (pl:=len(parts) / 2) or bits > pl:
             bit = parity
         else:
             bit = 1 if parity == 0 else 0
+
+        print(f'bit: {bit}')
+
 
         parts = list(filter(lambda p: int(p[x]) == bit, parts))
         if len(parts) == 1:
@@ -34,8 +39,11 @@ def get_value(lst, parity):
 
 def part_2(data):
     """Part 2"""
-    o2 = get_value(data, 1)
-    co2 = get_value(data, 0)
+
+    partials = [x for x in data]
+    o2 = get_value(partials, 1)
+    co2 = get_value(partials, 0)
+
 
     print(o2, co2)
     print(o2 * co2)
